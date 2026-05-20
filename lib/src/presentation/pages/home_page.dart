@@ -6,6 +6,7 @@ import '../widgets/date_header.dart';
 import '../widgets/week_page_view.dart';
 import '../widgets/task_card.dart';
 import '../dialogs/task_detail_dialog.dart';
+import 'add_task_page.dart';
 
 class HomePage extends StatefulWidget {
   final TaskController taskController;
@@ -70,6 +71,17 @@ class _HomePageState extends State<HomePage> {
     widget.taskController.toggleComplete(task);
   }
 
+  void _onAddTask() async {
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(builder: (_) => AddTaskPage(taskController: widget.taskController,),
+      ),
+    );
+    if (result == true){
+      _loadTasksForDate(_selectedDate);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -91,6 +103,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton(onPressed: _onAddTask, child: const Icon(Icons.add),),
     );
   }
 
