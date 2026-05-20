@@ -24,8 +24,8 @@ class DateHeader extends StatelessWidget {
               DateFormatter.dayMonth(selectedDate),
               textAlign: TextAlign.center,
               style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+                fontSize: 22,
+                fontWeight: FontWeight.w500,
                 color: Colors.white,
               ),
             ),

@@ -8,6 +8,7 @@ import '../widgets/week_page_view.dart';
 import '../widgets/task_card.dart';
 import '../dialogs/task_detail_dialog.dart';
 import 'add_task_page.dart';
+import 'package:flutter/services.dart';
 
 class HomePage extends StatefulWidget {
   final TaskController taskController;
@@ -100,33 +101,43 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // Устанавливаем цвет системной навигации в тон задач (безопасно внутри build)
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        systemNavigationBarColor: Color(0xFFFCFAFF),
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+    );
+
+    final topPadding = MediaQuery.of(context).padding.top;
+
     return Scaffold(
-      backgroundColor: AppConstants.accentColor, // фиолетовый фон всего экрана
-      body: SafeArea(
-        child: Column(
-          children: [
-            DateHeader(
-              selectedDate: _selectedDate,
-              onCalendarTap: _onCalendarTap,
-            ),
-            WeekPageView(
-              weekController: widget.weekController,
-              selectedDate: _selectedDate,
-              onDaySelected: _onDaySelected,
-            ),
-            Expanded(
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: AppConstants.taskBackgroundColor,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(24), // скругление левого верхнего угла
-                  ),
+      backgroundColor: AppConstants.accentColor,
+      body: Column(
+        children: [
+          SizedBox(height: topPadding), // отступ под статус-бар
+          DateHeader(
+            selectedDate: _selectedDate,
+            onCalendarTap: _onCalendarTap,
+          ),
+          WeekPageView(
+            weekController: widget.weekController,
+            selectedDate: _selectedDate,
+            onDaySelected: _onDaySelected,
+          ),
+          const SizedBox(height: 18,),
+          Expanded(
+            child: Container(
+              decoration: const BoxDecoration(
+                color: AppConstants.taskBackgroundColor,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(32),
                 ),
-                child: _buildTasksList(),
               ),
+              child: _buildTasksList(),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _onAddTask,
@@ -145,15 +156,19 @@ class _HomePageState extends State<HomePage> {
     }
 
     return ListView(
+      padding: const EdgeInsets.only(
+        top: 12,     // отступ от верхнего края до "Мои задачи"
+        left: 16,
+        right: 16,
+        bottom: 80, // чтобы кнопка "+" не перекрывала контент
+      ),
       children: [
         if (activeTasks.isNotEmpty) ...[
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text(
-              'Мои задачи',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
+          const Text(
+            'Мои задачи',
+            style: TextStyle(fontSize: 28, fontWeight: FontWeight.w500),
           ),
+          const SizedBox(height: 8),
           ...activeTasks.map((task) => TaskCard(
             task: task,
             onTap: () => _onTaskTap(task),
@@ -161,13 +176,12 @@ class _HomePageState extends State<HomePage> {
           )),
         ],
         if (completedTasks.isNotEmpty) ...[
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text(
-              'Завершённые задачи',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
+          const SizedBox(height: 24),
+          const Text(
+            'Завершённые задачи',
+            style: TextStyle(fontSize: 28, fontWeight: FontWeight.w500),
           ),
+          const SizedBox(height: 8),
           ...completedTasks.map((task) => TaskCard(
             task: task,
             onTap: () => _onTaskTap(task),

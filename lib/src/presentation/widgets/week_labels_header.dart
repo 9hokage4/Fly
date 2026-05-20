@@ -35,7 +35,7 @@ class WeekLabelsHeader extends StatelessWidget {
               style: TextStyle(
                 color: Color(0xFFFCFAFF),
                 fontSize: 14,
-                fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                fontWeight: isToday ? FontWeight.w500 : FontWeight.w400,
               ),
             ),
           ),
