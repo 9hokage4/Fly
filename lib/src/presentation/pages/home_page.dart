@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../controller/week_controller.dart';
 import '../../controller/task_controller.dart';
 import '../widgets/date_header.dart';
-import '../widgets/week_strip.dart';
+import '../widgets/week_row.dart';
 
 class HomePage extends StatefulWidget {
   final TaskController taskController;
@@ -61,8 +61,8 @@ class _HomePageState extends State<HomePage> {
               selectedDate: _selectedDate,
               onCalendarTap: _onCalendarTap,
             ),
-            WeekStrip(
-              weekController: widget.weekController,
+            WeekRow(
+              week: widget.weekController.currentWeek,
               selectedDate: _selectedDate,
               onDaySelected: _onDaySelected,
             ),
