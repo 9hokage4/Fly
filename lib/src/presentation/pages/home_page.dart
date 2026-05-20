@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../constants.dart';
 import '../../controller/week_controller.dart';
 import '../../controller/task_controller.dart';
 import '../../entity/task.dart';
@@ -100,6 +101,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppConstants.accentColor, // фиолетовый фон всего экрана
       body: SafeArea(
         child: Column(
           children: [
@@ -113,12 +115,23 @@ class _HomePageState extends State<HomePage> {
               onDaySelected: _onDaySelected,
             ),
             Expanded(
-              child: _buildTasksList(),
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: AppConstants.taskBackgroundColor,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(24), // скругление левого верхнего угла
+                  ),
+                ),
+                child: _buildTasksList(),
+              ),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: _onAddTask, child: const Icon(Icons.add),),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _onAddTask,
+        child: const Icon(Icons.add),
+      ),
     );
   }
 
