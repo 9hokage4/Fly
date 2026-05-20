@@ -30,7 +30,7 @@ class WeekDatesRow extends StatelessWidget {
                 style: TextStyle(
                   color: Colors.black,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  fontSize: 18,
+                  fontSize: 20,
                 ),
               ),
             ),

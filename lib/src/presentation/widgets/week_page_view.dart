@@ -64,7 +64,10 @@ class _WeekPageViewState extends State<WeekPageView> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const WeekLabelsHeader(),
+        WeekLabelsHeader(
+          isCurrentWeek: widget.weekController.weekOffset == 0,
+          todayWeekday: todayWeekday,
+        ),
         LayoutBuilder(
           builder: (context, constraints) {
             final cellWidth = constraints.maxWidth / 7;
