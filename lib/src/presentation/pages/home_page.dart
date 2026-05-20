@@ -47,15 +47,20 @@ class _HomePageState extends State<HomePage> {
     await widget.taskController.loadTasks(date);
   }
 
-  void _onCalendarTap() {
-    final today = DateTime.now();
-    if (today.year == _selectedDate.year &&
-        today.month == _selectedDate.month &&
-        today.day == _selectedDate.day) return;
-    setState(() {
-      _selectedDate = today;
-    });
-    _loadTasksForDate(today);
+  void _onCalendarTap() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2100),
+      locale: const Locale('ru'),
+    );
+    if (picked != null) {
+      setState(() {
+        _selectedDate = picked;
+      });
+      _loadTasksForDate(picked);
+    }
   }
 
   void _onDaySelected(DateTime date) {
