@@ -14,6 +14,14 @@ class TaskController extends ChangeNotifier {
   Future<void> loadTasks(DateTime date) async {
     _currentDate = date;
     tasksForDate = await _repository.getTasksByDate(date);
+    // Дополнительная сортировка (на случай, если репозиторий не отсортировал)
+    tasksForDate.sort((a, b) {
+      if (a.time == null && b.time == null) return 0;
+      if (a.time == null) return 1;
+      if (b.time == null) return -1;
+      return (a.time!.hour * 60 + a.time!.minute)
+          .compareTo(b.time!.hour * 60 + b.time!.minute);
+    });
     notifyListeners();
   }
 

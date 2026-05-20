@@ -39,6 +39,7 @@ class SqliteTaskRepository implements TaskRepository {
       'tasks',
       where: 'date = ?',
       whereArgs: [dateStr],
+      orderBy: 'time_hour IS NULL, time_hour, time_minute',
     );
     return rows.map((row) => _mapRowToTask(row)).toList();
   }
