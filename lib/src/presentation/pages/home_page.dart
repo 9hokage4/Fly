@@ -25,6 +25,25 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _selectedDate = DateTime.now();
+    // Загружаем задачи на сегодня
+    _loadTasksForDate(_selectedDate);
+    // Слушаем изменения в контроллере задач (при добавлении/удалении/переключении)
+    widget.taskController.addListener(_onTasksChanged);
+  }
+
+  @override
+  void dispose() {
+    widget.taskController.removeListener(_onTasksChanged);
+    super.dispose();
+  }
+
+  void _onTasksChanged() {
+    // Перерисовать список задач
+    setState(() {});
+  }
+
+  Future<void> _loadTasksForDate(DateTime date) async {
+    await widget.taskController.loadTasks(date);
   }
 
   void _onCalendarTap() {
@@ -32,9 +51,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _onDaySelected(DateTime date) {
+    if (date.year == _selectedDate.year &&
+        date.month == _selectedDate.month &&
+        date.day == _selectedDate.day) return;
     setState(() {
       _selectedDate = date;
     });
+    _loadTasksForDate(date);
   }
 
   @override
@@ -52,12 +75,57 @@ class _HomePageState extends State<HomePage> {
               selectedDate: _selectedDate,
               onDaySelected: _onDaySelected,
             ),
-            const Expanded(
-              child: Center(child: Text('Содержимое задач')),
+            Expanded(
+              child: _buildTasksList(),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildTasksList() {
+    final tasks = widget.taskController.tasksForDate;
+    final activeTasks = tasks.where((t) => !t.isCompleted).toList();
+    final completedTasks = tasks.where((t) => t.isCompleted).toList();
+
+    if (tasks.isEmpty) {
+      return const Center(child: Text('Нет задач на этот день'));
+    }
+
+    return ListView(
+      children: [
+        if (activeTasks.isNotEmpty) ...[
+          const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text(
+              'Мои задачи',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+          ...activeTasks.map((task) => ListTile(
+            title: Text(task.title),
+            subtitle: task.time != null
+                ? Text('${task.time!.hour}:${task.time!.minute.toString().padLeft(2, '0')}')
+                : null,
+          )),
+        ],
+        if (completedTasks.isNotEmpty) ...[
+          const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text(
+              'Завершённые задачи',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+          ...completedTasks.map((task) => ListTile(
+            title: Text(task.title, style: const TextStyle(decoration: TextDecoration.lineThrough)),
+            subtitle: task.time != null
+                ? Text('${task.time!.hour}:${task.time!.minute.toString().padLeft(2, '0')}')
+                : null,
+          )),
+        ],
+      ],
     );
   }
 }
