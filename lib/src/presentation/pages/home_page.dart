@@ -5,6 +5,7 @@ import '../../entity/task.dart';
 import '../widgets/date_header.dart';
 import '../widgets/week_page_view.dart';
 import '../widgets/task_card.dart';
+import '../dialogs/task_detail_dialog.dart';
 
 class HomePage extends StatefulWidget {
   final TaskController taskController;
@@ -60,7 +61,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _onTaskTap(Task task) {
-    // TODO: откроем диалог позже
+    showDialog(context: context,
+      builder: (context) => TaskDetailDialog(task: task),
+    );
   }
 
   void _onTaskToggle(Task task) {
