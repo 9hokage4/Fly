@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../controller/week_controller.dart';
 import '../../controller/task_controller.dart';
+import '../../entity/task.dart';
 import '../widgets/date_header.dart';
 import '../widgets/week_page_view.dart';
+import '../widgets/task_card.dart';
 
 class HomePage extends StatefulWidget {
   final TaskController taskController;
@@ -25,9 +27,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _selectedDate = DateTime.now();
-    // Загружаем задачи на сегодня
     _loadTasksForDate(_selectedDate);
-    // Слушаем изменения в контроллере задач (при добавлении/удалении/переключении)
     widget.taskController.addListener(_onTasksChanged);
   }
 
@@ -38,7 +38,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _onTasksChanged() {
-    // Перерисовать список задач
     setState(() {});
   }
 
@@ -58,6 +57,14 @@ class _HomePageState extends State<HomePage> {
       _selectedDate = date;
     });
     _loadTasksForDate(date);
+  }
+
+  void _onTaskTap(Task task) {
+    // TODO: откроем диалог позже
+  }
+
+  void _onTaskToggle(Task task) {
+    widget.taskController.toggleComplete(task);
   }
 
   @override
@@ -103,11 +110,10 @@ class _HomePageState extends State<HomePage> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
-          ...activeTasks.map((task) => ListTile(
-            title: Text(task.title),
-            subtitle: task.time != null
-                ? Text('${task.time!.hour}:${task.time!.minute.toString().padLeft(2, '0')}')
-                : null,
+          ...activeTasks.map((task) => TaskCard(
+            task: task,
+            onTap: () => _onTaskTap(task),
+            onToggle: () => _onTaskToggle(task),
           )),
         ],
         if (completedTasks.isNotEmpty) ...[
@@ -118,11 +124,10 @@ class _HomePageState extends State<HomePage> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
-          ...completedTasks.map((task) => ListTile(
-            title: Text(task.title, style: const TextStyle(decoration: TextDecoration.lineThrough)),
-            subtitle: task.time != null
-                ? Text('${task.time!.hour}:${task.time!.minute.toString().padLeft(2, '0')}')
-                : null,
+          ...completedTasks.map((task) => TaskCard(
+            task: task,
+            onTap: () => _onTaskTap(task),
+            onToggle: () => _onTaskToggle(task),
           )),
         ],
       ],
