@@ -16,16 +16,14 @@ class WeekDatesRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: List.generate(7, (index) {
         final date = week.days[index];
         final isSelected = date.year == selectedDate.year &&
             date.month == selectedDate.month &&
             date.day == selectedDate.day;
-        return GestureDetector(
-          onTap: () => onDaySelected(date),
-          child: SizedBox(
-            width: 44,
+        return Expanded(
+          child: GestureDetector(
+            onTap: () => onDaySelected(date),
             child: Center(
               child: Text(
                 '${date.day}',

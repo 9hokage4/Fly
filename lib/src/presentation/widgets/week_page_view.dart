@@ -21,7 +21,7 @@ class WeekPageView extends StatefulWidget {
 
 class _WeekPageViewState extends State<WeekPageView> {
   late PageController _pageController;
-  int _currentPage = 1; // 0: прошлая, 1: текущая (по offset), 2: следующая
+  int _currentPage = 1;
 
   @override
   void initState() {
@@ -59,31 +59,58 @@ class _WeekPageViewState extends State<WeekPageView> {
   @override
   Widget build(BuildContext context) {
     final isCurrentWeek = widget.weekController.weekOffset == 0;
-    final todayWeekday = DateTime.now().weekday;
+    final todayWeekday = DateTime.now().weekday; // 1..7
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        WeekLabelsHeader(
-          isCurrentWeek: isCurrentWeek,
-          todayWeekday: todayWeekday,
-        ),
-        SizedBox(
-          height: 40, // высота строки чисел
-          child: PageView.builder(
-            controller: _pageController,
-            onPageChanged: _onPageChanged,
-            itemCount: 3,
-            itemBuilder: (context, index) {
-              final offset = index - 1 + widget.weekController.weekOffset;
-              final week = widget.weekController.getWeekAtOffset(offset);
-              return WeekDatesRow(
-                week: week,
-                selectedDate: widget.selectedDate,
-                onDaySelected: widget.onDaySelected,
-              );
-            },
-          ),
+        const WeekLabelsHeader(),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final cellWidth = constraints.maxWidth / 7;
+            return SizedBox(
+              height: 50,
+              child: Stack(
+                children: [
+                  // Статичный кружок на фиксированной позиции
+                  Positioned(
+                    left: (todayWeekday - 1) * cellWidth,
+                    width: cellWidth,
+                    top: 0,
+                    bottom: 0,
+                    child: Center(
+                      child: Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: isCurrentWeek ? Colors.grey : Colors.white,
+                          border: !isCurrentWeek
+                              ? Border.all(color: Colors.grey.shade300)
+                              : null,
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Анимированные даты поверх кружка
+                  PageView.builder(
+                    controller: _pageController,
+                    onPageChanged: _onPageChanged,
+                    itemCount: 3,
+                    itemBuilder: (context, index) {
+                      final offset = index - 1 + widget.weekController.weekOffset;
+                      final week = widget.weekController.getWeekAtOffset(offset);
+                      return WeekDatesRow(
+                        week: week,
+                        selectedDate: widget.selectedDate,
+                        onDaySelected: widget.onDaySelected,
+                      );
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
         ),
       ],
     );
