@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
 import '../entity/week.dart';
-import '../model/week_calculator.dart';
 
 class WeekController extends ChangeNotifier {
-  final WeekCalculator _calculator = WeekCalculator();
+  late Week _baseWeek;        // всегда понедельник сегодняшней недели при последнем обновлении
+  int _weekOffset = 0;        // смещение от сегодняшней недели
 
-  int _weekOffset = 0;
-  Week _baseWeek;
+  WeekController() {
+    _updateBaseToToday();
+  }
 
-  WeekController() : _baseWeek = WeekCalculator().getCurrentWeek();
+  /// Обновить _baseWeek до понедельника сегодняшней недели
+  void _updateBaseToToday() {
+    final now = DateTime.now();
+    final daysFromMonday = now.weekday - 1;
+    _baseWeek = Week(
+      DateTime(now.year, now.month, now.day).subtract(Duration(days: daysFromMonday)),
+    );
+  }
 
   int get weekOffset => _weekOffset;
 
@@ -19,37 +27,25 @@ class WeekController extends ChangeNotifier {
   }
 
   void setWeekOffset(int offset) {
-    if (_weekOffset != offset) {
+    if (offset != _weekOffset) {
       _weekOffset = offset;
       notifyListeners();
     }
   }
 
-  void previousWeek() {
-    _weekOffset--;
-    notifyListeners();
-  }
-
-  void nextWeek() {
-    _weekOffset++;
-    notifyListeners();
-  }
-
-  void resetToCurrent() {
-    _baseWeek = _calculator.getCurrentWeek();
-    _weekOffset = 0;
-    notifyListeners();
-  }
-
-  /// Переключает неделю так, чтобы она содержала указанную дату
+  /// Перейти к неделе, содержащей [date]
   void goToDate(DateTime date) {
-    // Вычисляем понедельник недели, содержащей выбранную дату
-    final daysFromMonday = date.weekday - 1;
+    // Всегда пересчитываем базовую неделю от сегодня, чтобы не зависеть от предыдущих смещений
+    _updateBaseToToday();
+    // Понедельник недели, в которую входит выбранная дата
     final monday = DateTime(date.year, date.month, date.day)
-        .subtract(Duration(days: daysFromMonday));
-    // Устанавливаем новую базовую неделю и сбрасываем смещение
-    _baseWeek = Week(monday);
-    _weekOffset = 0;
-    notifyListeners();
+        .subtract(Duration(days: date.weekday - 1));
+    // Разница в днях между понедельником выбранной недели и сегодняшней неделей
+    final diffDays = monday.difference(_baseWeek.startMonday).inDays;
+    final offset = diffDays ~/ 7;
+    if (offset != _weekOffset) {
+      _weekOffset = offset;
+      notifyListeners();
+    }
   }
 }

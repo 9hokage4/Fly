@@ -20,13 +20,14 @@ class WeekPageView extends StatefulWidget {
 }
 
 class _WeekPageViewState extends State<WeekPageView> {
+  static const int _centerPage = 1000;
   late PageController _pageController;
-  int _currentPage = 1;
+  int _currentPage = _centerPage;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: 1);
+    _pageController = PageController(initialPage: _centerPage);
     widget.weekController.addListener(_syncFromController);
   }
 
@@ -38,10 +39,10 @@ class _WeekPageViewState extends State<WeekPageView> {
   }
 
   void _syncFromController() {
-    final targetPage = widget.weekController.weekOffset + 1; // 1 при сбросе
-    if (_currentPage != targetPage) {
-      // Если разница больше чем на 1 страницу, мгновенно переходим без анимации
-      if ((_currentPage - targetPage).abs() > 1) {
+    final targetPage = widget.weekController.weekOffset + _centerPage;
+    if (targetPage != _currentPage) {
+      // Если прыжок больше чем на 1 неделю — мгновенно, без анимации
+      if ((targetPage - _currentPage).abs() > 1) {
         _pageController.jumpToPage(targetPage);
       } else {
         _pageController.animateToPage(
@@ -55,22 +56,22 @@ class _WeekPageViewState extends State<WeekPageView> {
   }
 
   void _onPageChanged(int page) {
-    if (page == _currentPage) return;
-    final offset = page - 1;
-    widget.weekController.setWeekOffset(offset);
-    setState(() => _currentPage = page);
+    if (page != _currentPage) {
+      widget.weekController.setWeekOffset(page - _centerPage);
+      setState(() => _currentPage = page);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final isCurrentWeek = widget.weekController.weekOffset == 0;
-    final todayWeekday = DateTime.now().weekday; // 1..7
+    final todayWeekday = DateTime.now().weekday;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         WeekLabelsHeader(
-          isCurrentWeek: widget.weekController.weekOffset == 0,
+          isCurrentWeek: isCurrentWeek,
           todayWeekday: todayWeekday,
         ),
         LayoutBuilder(
@@ -80,7 +81,7 @@ class _WeekPageViewState extends State<WeekPageView> {
               height: 50,
               child: Stack(
                 children: [
-                  // Статичный кружок на фиксированной позиции
+                  // Статичный кружок
                   Positioned(
                     left: (todayWeekday - 1) * cellWidth,
                     width: cellWidth,
@@ -100,13 +101,13 @@ class _WeekPageViewState extends State<WeekPageView> {
                       ),
                     ),
                   ),
-                  // Анимированные даты поверх кружка
+                  // Бесконечный скролл дат
                   PageView.builder(
                     controller: _pageController,
                     onPageChanged: _onPageChanged,
-                    itemCount: 3,
+                    itemCount: 2001,
                     itemBuilder: (context, index) {
-                      final offset = index - 1 + widget.weekController.weekOffset;
+                      final offset = index - _centerPage;
                       final week = widget.weekController.getWeekAtOffset(offset);
                       return WeekDatesRow(
                         week: week,
