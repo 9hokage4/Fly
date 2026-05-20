@@ -41,7 +41,7 @@ class _WeekPageViewState extends State<WeekPageView> {
   void _syncFromController() {
     final targetPage = widget.weekController.weekOffset + _centerPage;
     if (targetPage != _currentPage) {
-      // Если прыжок больше чем на 1 неделю — мгновенно, без анимации
+      // Если прыжок больше чем на 1 неделю - мгновенно, без анимации
       if ((targetPage - _currentPage).abs() > 1) {
         _pageController.jumpToPage(targetPage);
       } else {
@@ -74,52 +74,24 @@ class _WeekPageViewState extends State<WeekPageView> {
           isCurrentWeek: isCurrentWeek,
           todayWeekday: todayWeekday,
         ),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final cellWidth = constraints.maxWidth / 7;
-            return SizedBox(
-              height: 50,
-              child: Stack(
-                children: [
-                  // Статичный кружок
-                  Positioned(
-                    left: (todayWeekday - 1) * cellWidth,
-                    width: cellWidth,
-                    top: 0,
-                    bottom: 0,
-                    child: Center(
-                      child: Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: isCurrentWeek ? Colors.grey : Colors.white,
-                          border: !isCurrentWeek
-                              ? Border.all(color: Colors.grey.shade300)
-                              : null,
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Бесконечный скролл дат
-                  PageView.builder(
-                    controller: _pageController,
-                    onPageChanged: _onPageChanged,
-                    itemCount: 2001,
-                    itemBuilder: (context, index) {
-                      final offset = index - _centerPage;
-                      final week = widget.weekController.getWeekAtOffset(offset);
-                      return WeekDatesRow(
-                        week: week,
-                        selectedDate: widget.selectedDate,
-                        onDaySelected: widget.onDaySelected,
-                      );
-                    },
-                  ),
-                ],
-              ),
-            );
-          },
+        SizedBox(
+          height: 50,
+          child: PageView.builder(
+            controller: _pageController,
+            onPageChanged: _onPageChanged,
+            itemCount: 2001,
+            itemBuilder: (context, index) {
+              final offset = index - _centerPage;
+              final week = widget.weekController.getWeekAtOffset(offset);
+              return WeekDatesRow(
+                week: week,
+                selectedDate: widget.selectedDate,
+                onDaySelected: widget.onDaySelected,
+                isCurrentWeek: offset == 0,
+                todayWeekday: todayWeekday,
+              );
+            },
+          ),
         ),
       ],
     );
