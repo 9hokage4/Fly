@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../controller/week_controller.dart';
-import '../../entity/week.dart';
-import 'week_row.dart';
+import 'week_labels_header.dart';
+import 'week_dates_row.dart';
 
 class WeekPageView extends StatefulWidget {
   final WeekController weekController;
@@ -21,7 +21,7 @@ class WeekPageView extends StatefulWidget {
 
 class _WeekPageViewState extends State<WeekPageView> {
   late PageController _pageController;
-  int _currentPage = 1; // 0 = прошлая, 1 = текущая (по offset), 2 = следующая
+  int _currentPage = 1; // 0: прошлая, 1: текущая (по offset), 2: следующая
 
   @override
   void initState() {
@@ -38,9 +38,7 @@ class _WeekPageViewState extends State<WeekPageView> {
   }
 
   void _syncFromController() {
-    // Когда контроллер меняет неделю программно, перелистываем PageView
-    final newOffset = widget.weekController.weekOffset;
-    final targetPage = newOffset + 1; // offset -1 -> page 0, offset 0 -> page 1, etc.
+    final targetPage = widget.weekController.weekOffset + 1;
     if (_currentPage != targetPage) {
       _pageController.animateToPage(
         targetPage,
@@ -53,41 +51,41 @@ class _WeekPageViewState extends State<WeekPageView> {
 
   void _onPageChanged(int page) {
     if (page == _currentPage) return;
-    final offsetDelta = page - 1; // page 0 -> -1, page 1 -> 0, page 2 -> +1
-    widget.weekController.setWeekOffset(offsetDelta);
+    final offset = page - 1;
+    widget.weekController.setWeekOffset(offset);
     setState(() => _currentPage = page);
-  }
-
-  Week _weekForOffset(int offset) {
-    // Передаём offset относительно базовой недели контроллера
-    // Используем метод, который даст неделю для заданного смещения.
-    final currentOffset = widget.weekController.weekOffset;
-    final diff = offset - currentOffset;
-    final base = widget.weekController.currentWeek;
-    if (diff == 0) return base;
-    return Week(base.startMonday.add(Duration(days: 7 * diff)));
   }
 
   @override
   Widget build(BuildContext context) {
-    final currentOffset = widget.weekController.weekOffset;
+    final isCurrentWeek = widget.weekController.weekOffset == 0;
+    final todayWeekday = DateTime.now().weekday;
 
-    return SizedBox(
-      height: 80, // примерно высота строки недели
-      child: PageView.builder(
-        controller: _pageController,
-        onPageChanged: _onPageChanged,
-        itemCount: 3,
-        itemBuilder: (context, index) {
-          final offset = index - 1; // -1, 0, 1 относительно currentOffset
-          final week = _weekForOffset(currentOffset + offset);
-          return WeekRow(
-            week: week,
-            selectedDate: widget.selectedDate,
-            onDaySelected: widget.onDaySelected,
-          );
-        },
-      ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        WeekLabelsHeader(
+          isCurrentWeek: isCurrentWeek,
+          todayWeekday: todayWeekday,
+        ),
+        SizedBox(
+          height: 40, // высота строки чисел
+          child: PageView.builder(
+            controller: _pageController,
+            onPageChanged: _onPageChanged,
+            itemCount: 3,
+            itemBuilder: (context, index) {
+              final offset = index - 1 + widget.weekController.weekOffset;
+              final week = widget.weekController.getWeekAtOffset(offset);
+              return WeekDatesRow(
+                week: week,
+                selectedDate: widget.selectedDate,
+                onDaySelected: widget.onDaySelected,
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
