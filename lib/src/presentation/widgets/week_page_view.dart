@@ -38,13 +38,18 @@ class _WeekPageViewState extends State<WeekPageView> {
   }
 
   void _syncFromController() {
-    final targetPage = widget.weekController.weekOffset + 1;
+    final targetPage = widget.weekController.weekOffset + 1; // 1 при сбросе
     if (_currentPage != targetPage) {
-      _pageController.animateToPage(
-        targetPage,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
+      // Если разница больше чем на 1 страницу, мгновенно переходим без анимации
+      if ((_currentPage - targetPage).abs() > 1) {
+        _pageController.jumpToPage(targetPage);
+      } else {
+        _pageController.animateToPage(
+          targetPage,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
       setState(() => _currentPage = targetPage);
     }
   }

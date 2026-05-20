@@ -43,13 +43,13 @@ class WeekController extends ChangeNotifier {
 
   /// Переключает неделю так, чтобы она содержала указанную дату
   void goToDate(DateTime date) {
-    // Определяем понедельник для выбранной даты
-    final monday = DateTime(date.year, date.month, date.day);
-    final offsetDays = monday.difference(_baseWeek.startMonday).inDays;
-    final newOffset = offsetDays ~/ 7; // целое число недель
-    if (newOffset != _weekOffset) {
-      _weekOffset = newOffset;
-      notifyListeners();
-    }
+    // Вычисляем понедельник недели, содержащей выбранную дату
+    final daysFromMonday = date.weekday - 1;
+    final monday = DateTime(date.year, date.month, date.day)
+        .subtract(Duration(days: daysFromMonday));
+    // Устанавливаем новую базовую неделю и сбрасываем смещение
+    _baseWeek = Week(monday);
+    _weekOffset = 0;
+    notifyListeners();
   }
 }
