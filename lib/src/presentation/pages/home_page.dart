@@ -56,6 +56,9 @@ class _HomePageState extends State<HomePage> {
       locale: const Locale('ru'),
     );
     if (picked != null) {
+      // Переключаем неделю на ту, где находится выбранная дата
+      widget.weekController.goToDate(picked);
+      // Обновляем выбранную дату и загружаем задачи
       setState(() {
         _selectedDate = picked;
       });
