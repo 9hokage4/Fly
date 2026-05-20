@@ -48,7 +48,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _onCalendarTap() {
-    // TODO: позже
+    final today = DateTime.now();
+    if (today.year == _selectedDate.year &&
+        today.month == _selectedDate.month &&
+        today.day == _selectedDate.day) return;
+    setState(() {
+      _selectedDate = today;
+    });
+    _loadTasksForDate(today);
   }
 
   void _onDaySelected(DateTime date) {
