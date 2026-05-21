@@ -9,6 +9,7 @@ import '../widgets/task_card.dart';
 import '../dialogs/task_detail_dialog.dart';
 import 'add_task_page.dart';
 import 'package:flutter/services.dart';
+import '../dialogs/task_calendar_dialog.dart';
 
 class HomePage extends StatefulWidget {
   final TaskController taskController;
@@ -26,6 +27,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late DateTime _selectedDate;
+  Map<DateTime, String> _taskStatuses = {};
 
   @override
   void initState() {
@@ -33,15 +35,33 @@ class _HomePageState extends State<HomePage> {
     _selectedDate = DateTime.now();
     _loadTasksForDate(_selectedDate);
     widget.taskController.addListener(_onTasksChanged);
+    widget.weekController.addListener(_loadWeekTaskStatuses);
+    _loadWeekTaskStatuses(); // начальная загрузка
+  }
+
+  Future<void> _loadWeekTaskStatuses() async {
+    final week = widget.weekController.currentWeek;
+    final Map<DateTime, String> newStatuses = {};
+    for (final date in week.days) {
+      final status = await widget.taskController.getDateTaskStatus(date);
+      newStatuses[date] = status;
+    }
+    if (mounted) {
+      setState(() {
+        _taskStatuses = newStatuses;
+      });
+    }
   }
 
   @override
   void dispose() {
     widget.taskController.removeListener(_onTasksChanged);
+    widget.weekController.removeListener(_loadWeekTaskStatuses);
     super.dispose();
   }
 
   void _onTasksChanged() {
+    _loadWeekTaskStatuses();
     setState(() {});
   }
 
@@ -50,21 +70,19 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _onCalendarTap() async {
-    final picked = await showDatePicker(
+    final selectedDate = await showDialog<DateTime>(
       context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2100),
-      locale: const Locale('ru'),
+      builder: (_) => TaskCalendarDialog(
+        taskController: widget.taskController,
+        initialDate: _selectedDate,
+      ),
     );
-    if (picked != null) {
-      // Переключаем неделю на ту, где находится выбранная дата
-      widget.weekController.goToDate(picked);
-      // Обновляем выбранную дату и загружаем задачи
+    if (selectedDate != null) {
+      widget.weekController.goToDate(selectedDate);
       setState(() {
-        _selectedDate = picked;
+        _selectedDate = selectedDate;
       });
-      _loadTasksForDate(picked);
+      _loadTasksForDate(selectedDate);
     }
   }
 
@@ -124,6 +142,7 @@ class _HomePageState extends State<HomePage> {
             weekController: widget.weekController,
             selectedDate: _selectedDate,
             onDaySelected: _onDaySelected,
+            taskStatuses: _taskStatuses,
           ),
           const SizedBox(height: 18,),
           Expanded(

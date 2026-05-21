@@ -17,6 +17,7 @@ class WeekDatesRow extends StatelessWidget {
     required this.onDaySelected,
     required this.isCurrentWeek,
     required this.todayWeekday,
+    required Map<DateTime, String> taskStatuses,
   });
 
   @override

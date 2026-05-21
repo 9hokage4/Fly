@@ -7,12 +7,14 @@ class WeekPageView extends StatefulWidget {
   final WeekController weekController;
   final DateTime selectedDate;
   final ValueChanged<DateTime> onDaySelected;
+  final Map<DateTime, String> taskStatuses; //  поле для статусов
 
   const WeekPageView({
     super.key,
     required this.weekController,
     required this.selectedDate,
     required this.onDaySelected,
+    required this.taskStatuses, //  сохранено
   });
 
   @override
@@ -41,7 +43,6 @@ class _WeekPageViewState extends State<WeekPageView> {
   void _syncFromController() {
     final targetPage = widget.weekController.weekOffset + _centerPage;
     if (targetPage != _currentPage) {
-      // Если прыжок больше чем на 1 неделю - мгновенно, без анимации
       if ((targetPage - _currentPage).abs() > 1) {
         _pageController.jumpToPage(targetPage);
       } else {
@@ -89,6 +90,7 @@ class _WeekPageViewState extends State<WeekPageView> {
                 onDaySelected: widget.onDaySelected,
                 isCurrentWeek: offset == 0,
                 todayWeekday: todayWeekday,
+                taskStatuses: widget.taskStatuses, // передача статусов
               );
             },
           ),
