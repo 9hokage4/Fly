@@ -36,7 +36,7 @@ class _HomePageState extends State<HomePage> {
     _loadTasksForDate(_selectedDate);
     widget.taskController.addListener(_onTasksChanged);
     widget.weekController.addListener(_loadWeekTaskStatuses);
-    _loadWeekTaskStatuses(); // начальная загрузка
+    _loadWeekTaskStatuses();
   }
 
   Future<void> _loadWeekTaskStatuses() async {
@@ -96,10 +96,21 @@ class _HomePageState extends State<HomePage> {
     _loadTasksForDate(date);
   }
 
+  // Обновлённый метод: передаём onDelete в диалог
   void _onTaskTap(Task task) {
-    showDialog(context: context,
-      builder: (context) => TaskDetailDialog(task: task),
+    showDialog(
+      context: context,
+      builder: (context) => TaskDetailDialog(
+        task: task,
+        onDelete: () => _onTaskDelete(task),
+      ),
     );
+  }
+
+  // Новый метод удаления задачи
+  void _onTaskDelete(Task task) {
+    widget.taskController.deleteTask(task.id);
+    // Контроллер сам вызовет loadTasks и обновит UI через _onTasksChanged
   }
 
   void _onTaskToggle(Task task) {
@@ -109,17 +120,17 @@ class _HomePageState extends State<HomePage> {
   void _onAddTask() async {
     final result = await Navigator.push<bool>(
       context,
-      MaterialPageRoute(builder: (_) => AddTaskPage(taskController: widget.taskController,),
+      MaterialPageRoute(
+        builder: (_) => AddTaskPage(taskController: widget.taskController),
       ),
     );
-    if (result == true){
+    if (result == true) {
       _loadTasksForDate(_selectedDate);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Устанавливаем цвет системной навигации в тон задач (безопасно внутри build)
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
         systemNavigationBarColor: Color(0xFFFCFAFF),
@@ -133,7 +144,7 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: AppConstants.accentColor,
       body: Column(
         children: [
-          SizedBox(height: topPadding), // отступ под статус-бар
+          SizedBox(height: topPadding),
           DateHeader(
             selectedDate: _selectedDate,
             onCalendarTap: _onCalendarTap,
@@ -144,7 +155,7 @@ class _HomePageState extends State<HomePage> {
             onDaySelected: _onDaySelected,
             taskStatuses: _taskStatuses,
           ),
-          const SizedBox(height: 18,),
+          const SizedBox(height: 18),
           Expanded(
             child: Container(
               decoration: const BoxDecoration(
@@ -158,19 +169,19 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-        floatingActionButton: Container(
-          width: 54,
-          height: 54,
-          decoration: const BoxDecoration(
-            shape: BoxShape.circle,
-            color: AppConstants.accentColor,
-          ),
-          child: IconButton(
-            icon: const Icon(Icons.add, color: Colors.white, size: 28),
-            onPressed: _onAddTask,
-          ),
+      floatingActionButton: Container(
+        width: 54,
+        height: 54,
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          color: AppConstants.accentColor,
         ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        child: IconButton(
+          icon: const Icon(Icons.add, color: Colors.white, size: 28),
+          onPressed: _onAddTask,
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
@@ -186,13 +197,12 @@ class _HomePageState extends State<HomePage> {
     return ListView(
       padding: const EdgeInsets.only(
         top: 8,
-        bottom: 100, // чтобы кнопка не перекрывала контент
-        // горизонтальные отступы зададим отдельно
+        bottom: 100,
       ),
       children: [
         if (activeTasks.isNotEmpty) ...[
           const Padding(
-            padding: EdgeInsets.only(left: 32, right: 16, top: 20), // увеличенный левый отступ
+            padding: EdgeInsets.only(left: 32, right: 16),
             child: Text(
               'Мои задачи',
               style: TextStyle(fontSize: 28, fontWeight: FontWeight.w500),
@@ -209,7 +219,7 @@ class _HomePageState extends State<HomePage> {
                 ? AppConstants.accentColor
                 : AppConstants.todayCircleColor;
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16), // карточки остаются на 16
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: TaskCard(
                 task: task,
                 onTap: () => _onTaskTap(task),
