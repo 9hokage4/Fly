@@ -139,10 +139,19 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _onAddTask,
-        child: const Icon(Icons.add),
-      ),
+        floatingActionButton: Container(
+          width: 54,
+          height: 54,
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: AppConstants.accentColor,
+          ),
+          child: IconButton(
+            icon: const Icon(Icons.add, color: Colors.white, size: 28),
+            onPressed: _onAddTask,
+          ),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
@@ -157,10 +166,10 @@ class _HomePageState extends State<HomePage> {
 
     return ListView(
       padding: const EdgeInsets.only(
-        top: 12,     // отступ от верхнего края до "Мои задачи"
+        top: 20,     // отступ от верхнего края до "Мои задачи"
         left: 16,
         right: 16,
-        bottom: 80, // чтобы кнопка "+" не перекрывала контент
+        bottom: 100, // чтобы кнопка "+" не перекрывала контент
       ),
       children: [
         if (activeTasks.isNotEmpty) ...[
@@ -168,25 +177,35 @@ class _HomePageState extends State<HomePage> {
             'Мои задачи',
             style: TextStyle(fontSize: 28, fontWeight: FontWeight.w500),
           ),
-          const SizedBox(height: 8),
-          ...activeTasks.map((task) => TaskCard(
-            task: task,
-            onTap: () => _onTaskTap(task),
-            onToggle: () => _onTaskToggle(task),
-          )),
+          const SizedBox(height: 16),
+    ...activeTasks.asMap().entries.map((entry) {
+    final index = entry.key;
+    final task = entry.value;
+    final bgColor = index % 2 == 0 ? AppConstants.dateCircleColor : AppConstants.accentColor;
+    final markerColor = index % 2 == 0 ? AppConstants.accentColor : AppConstants.todayCircleColor;
+    return TaskCard(
+    task: task,
+    onTap: () => _onTaskTap(task),
+    onToggle: () => _onTaskToggle(task),
+    backgroundColor: bgColor,
+    markerColor: markerColor,
+    );
+    }),
         ],
         if (completedTasks.isNotEmpty) ...[
-          const SizedBox(height: 24),
+          const SizedBox(height: 8),
           const Text(
             'Завершённые задачи',
             style: TextStyle(fontSize: 28, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 8),
-          ...completedTasks.map((task) => TaskCard(
-            task: task,
-            onTap: () => _onTaskTap(task),
-            onToggle: () => _onTaskToggle(task),
-          )),
+    ...completedTasks.map((task) => TaskCard(
+    task: task,
+    onTap: () => _onTaskTap(task),
+    onToggle: () => _onTaskToggle(task),
+    backgroundColor: AppConstants.dateCircleColor,
+    markerColor: AppConstants.accentColor,
+    )),
         ],
       ],
     );
