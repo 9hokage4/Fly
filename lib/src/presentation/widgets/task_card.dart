@@ -33,47 +33,43 @@ class TaskCard extends StatelessWidget {
             color: backgroundColor,
             borderRadius: BorderRadius.circular(10),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16), // увеличенные отступы
           child: Row(
             children: [
               // Время
               SizedBox(
-                width: 48,
+                width: 56, // немного расширили
                 child: Text(
                   timeString,
                   style: const TextStyle(
-                    fontSize: 12,
+                    fontSize: 14, // было 12
                     fontWeight: FontWeight.w400,
                     color: Colors.black,
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
-              // Название задачи с гарантированным перечёркиванием
+              const SizedBox(width: 16),
+              // Название задачи
               Expanded(
-                child: RichText(
+                child: Text(
+                  task.title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  text: TextSpan(
-                    text: task.title,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: task.isCompleted ? Colors.grey : Colors.black,
-                      decoration: task.isCompleted
-                          ? TextDecoration.lineThrough
-                          : null,
-                    ),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.black,
+                    decoration: task.isCompleted ? TextDecoration.lineThrough : null,
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 16),
               // Маркер выполнения
               GestureDetector(
                 onTap: onToggle,
                 child: Container(
-                  width: 20,
-                  height: 20,
+                  width: 24,
+                  height: 24,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(
@@ -83,7 +79,7 @@ class TaskCard extends StatelessWidget {
                     color: task.isCompleted ? markerColor : Colors.transparent,
                   ),
                   child: task.isCompleted
-                      ? const Icon(Icons.check, size: 14, color: Colors.white)
+                      ? const Icon(Icons.check, size: 16, color: Colors.white) // иконка чуть крупнее
                       : null,
                 ),
               ),

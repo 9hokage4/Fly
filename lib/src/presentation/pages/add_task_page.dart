@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../constants.dart';
 import '../../entity/task.dart';
 import '../../controller/task_controller.dart';
 
@@ -46,7 +47,9 @@ class _AddTaskPageState extends State<AddTaskPage> {
 
   String _formatTime(TimeOfDay? time) {
     if (time == null) return 'Не выбрано';
-    return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+    final hour = time.hour.toString().padLeft(2, '0');
+    final minute = time.minute.toString().padLeft(2, '0');
+    return '$hour:$minute';
   }
 
   void _onSave() {
@@ -66,61 +69,137 @@ class _AddTaskPageState extends State<AddTaskPage> {
     );
 
     widget.taskController.addTask(task).then((_) {
-      Navigator.of(context).pop(true); // true = задача добавлена
+      Navigator.of(context).pop(true);
     });
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Новая задача')),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
+      backgroundColor: AppConstants.taskBackgroundColor, // светлый фон
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        title: const Text(
+          'Создать задачу',
+          style: TextStyle(
+            fontFamily: 'Roboto',
+            fontWeight: FontWeight.w600, // SemiBold
+            fontSize: 32, // 96px / 3
+            color: Colors.black,
+          ),
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextField(
-              controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: 'Название задачи',
-                border: OutlineInputBorder(),
+            SizedBox(height: 20,),
+            // Название
+            const Text(
+              'Название',
+              style: TextStyle(
+                fontFamily: 'Roboto',
+                fontWeight: FontWeight.w500, // Medium
+                fontSize: 20,
               ),
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _descriptionController,
-              maxLines: 3,
-              decoration: const InputDecoration(
-                labelText: 'Описание задачи',
-                border: OutlineInputBorder(),
+            const SizedBox(height: 8),
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: AppConstants.dateCircleColor, // #EADAFF
+                borderRadius: BorderRadius.circular(10), // 30px / 3
+              ),
+              child: TextField(
+                controller: _titleController,
+                style: const TextStyle(fontSize: 16),
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
+            // Описание
+            const Text(
+              'Описание',
+              style: TextStyle(
+                fontFamily: 'Roboto',
+                fontWeight: FontWeight.w500,
+                fontSize: 20,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              width: double.infinity,
+              height: 94, // 283px / 3 ≈ 94
+              decoration: BoxDecoration(
+                color: AppConstants.dateCircleColor,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: TextField(
+                controller: _descriptionController,
+                maxLines: null,
+                expands: true,
+                textAlignVertical: TextAlignVertical.top,
+                style: const TextStyle(fontSize: 16),
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Дата
             ListTile(
+              contentPadding: EdgeInsets.zero,
               title: const Text('Дата'),
               subtitle: Text(_formatDate(_selectedDate)),
               trailing: const Icon(Icons.calendar_today),
               onTap: _pickDate,
             ),
+            // Время
             ListTile(
+              contentPadding: EdgeInsets.zero,
               title: const Text('Время'),
               subtitle: Text(_formatTime(_selectedTime)),
               trailing: const Icon(Icons.access_time),
               onTap: _pickTime,
             ),
-            const Spacer(),
+            const SizedBox(height: 30),
+            // Кнопки
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey,
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                  ),
                   onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text('Отмена'),
+                  child: const Text('Отмена', style: TextStyle(fontSize: 18)),
                 ),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppConstants.accentColor,
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                  ),
                   onPressed: _onSave,
-                  child: const Text('Готово'),
+                  child: const Text('Готово', style: TextStyle(fontSize: 18, color: Colors.white)),
                 ),
               ],
             ),
+            const SizedBox(height: 20),
           ],
         ),
       ),
