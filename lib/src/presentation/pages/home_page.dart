@@ -131,7 +131,7 @@ class _HomePageState extends State<HomePage> {
               decoration: const BoxDecoration(
                 color: AppConstants.taskBackgroundColor,
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(32),
+                  topLeft: Radius.circular(38),
                 ),
               ),
               child: _buildTasksList(),
@@ -166,46 +166,61 @@ class _HomePageState extends State<HomePage> {
 
     return ListView(
       padding: const EdgeInsets.only(
-        top: 20,     // отступ от верхнего края до "Мои задачи"
-        left: 16,
-        right: 16,
-        bottom: 100, // чтобы кнопка "+" не перекрывала контент
+        top: 8,
+        bottom: 100, // чтобы кнопка не перекрывала контент
+        // горизонтальные отступы зададим отдельно
       ),
       children: [
         if (activeTasks.isNotEmpty) ...[
-          const Text(
-            'Мои задачи',
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.w500),
+          const Padding(
+            padding: EdgeInsets.only(left: 32, right: 16, top: 20), // увеличенный левый отступ
+            child: Text(
+              'Мои задачи',
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.w500),
+            ),
           ),
-          const SizedBox(height: 16),
-    ...activeTasks.asMap().entries.map((entry) {
-    final index = entry.key;
-    final task = entry.value;
-    final bgColor = index % 2 == 0 ? AppConstants.dateCircleColor : AppConstants.accentColor;
-    final markerColor = index % 2 == 0 ? AppConstants.accentColor : AppConstants.todayCircleColor;
-    return TaskCard(
-    task: task,
-    onTap: () => _onTaskTap(task),
-    onToggle: () => _onTaskToggle(task),
-    backgroundColor: bgColor,
-    markerColor: markerColor,
-    );
-    }),
+          const SizedBox(height: 8),
+          ...activeTasks.asMap().entries.map((entry) {
+            final index = entry.key;
+            final task = entry.value;
+            final bgColor = index % 2 == 0
+                ? AppConstants.dateCircleColor
+                : AppConstants.accentColor;
+            final markerColor = index % 2 == 0
+                ? AppConstants.accentColor
+                : AppConstants.todayCircleColor;
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16), // карточки остаются на 16
+              child: TaskCard(
+                task: task,
+                onTap: () => _onTaskTap(task),
+                onToggle: () => _onTaskToggle(task),
+                backgroundColor: bgColor,
+                markerColor: markerColor,
+              ),
+            );
+          }),
         ],
         if (completedTasks.isNotEmpty) ...[
-          const SizedBox(height: 8),
-          const Text(
-            'Завершённые задачи',
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.w500),
+          const SizedBox(height: 24),
+          const Padding(
+            padding: EdgeInsets.only(left: 32, right: 16),
+            child: Text(
+              'Завершённые задачи',
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.w500),
+            ),
           ),
           const SizedBox(height: 8),
-    ...completedTasks.map((task) => TaskCard(
-    task: task,
-    onTap: () => _onTaskTap(task),
-    onToggle: () => _onTaskToggle(task),
-    backgroundColor: AppConstants.dateCircleColor,
-    markerColor: AppConstants.accentColor,
-    )),
+          ...completedTasks.map((task) => Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: TaskCard(
+              task: task,
+              onTap: () => _onTaskTap(task),
+              onToggle: () => _onTaskToggle(task),
+              backgroundColor: AppConstants.dateCircleColor,
+              markerColor: AppConstants.accentColor,
+            ),
+          )),
         ],
       ],
     );
