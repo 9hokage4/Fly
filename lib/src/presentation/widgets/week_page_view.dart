@@ -88,9 +88,7 @@ class _WeekPageViewState extends State<WeekPageView> {
                 week: week,
                 selectedDate: widget.selectedDate,
                 onDaySelected: widget.onDaySelected,
-                isCurrentWeek: offset == 0,
                 todayWeekday: todayWeekday,
-                taskStatuses: widget.taskStatuses, // передача статусов
               );
             },
           ),

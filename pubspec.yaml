@@ -36,6 +36,8 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   table_calendar: ^3.2.0
+  shared_preferences: ^2.2.2
+  provider: ^6.1.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -62,6 +64,16 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: fonts/Roboto.ttf
+    - family: Impact
+      fonts:
+          - asset: fonts/Impact.ttf
+    - family: Saxonia Antiqua
+      fonts:
+        - asset: fonts/Saxonia Antiqua.ttf
 
   # To add assets to your application, add an assets section, like this:
   # assets:

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../constants.dart';
+import '../../model/settings_model.dart';
 import '../../entity/week.dart';
 import 'dashed_circle_border.dart';
 
@@ -7,7 +9,6 @@ class WeekDatesRow extends StatelessWidget {
   final Week week;
   final DateTime selectedDate;
   final ValueChanged<DateTime> onDaySelected;
-  final bool isCurrentWeek;
   final int todayWeekday;
 
   const WeekDatesRow({
@@ -15,50 +16,61 @@ class WeekDatesRow extends StatelessWidget {
     required this.week,
     required this.selectedDate,
     required this.onDaySelected,
-    required this.isCurrentWeek,
     required this.todayWeekday,
-    required Map<DateTime, String> taskStatuses,
   });
 
   @override
   Widget build(BuildContext context) {
+    final settings = context.watch<SettingsModel>();
+    final accentColor = settings.accentColor;
+    final lightAccent = settings.lightAccentColor;
+
     final today = DateTime.now();
-    final isRealTodayWeek = week.days.any((d) =>
-    d.year == today.year &&
-        d.month == today.month &&
-        d.day == today.day);
 
     return Row(
       children: List.generate(7, (index) {
         final date = week.days[index];
         final weekday = index + 1;
-        final isTodayDate = isRealTodayWeek &&
-            date.year == today.year &&
+
+        final isRealToday = date.year == today.year &&
             date.month == today.month &&
             date.day == today.day;
+
+        final isSelected = date.year == selectedDate.year &&
+            date.month == selectedDate.month &&
+            date.day == selectedDate.day;
 
         Color circleColor;
         double circleSize;
         bool showDashedBorder = false;
-        double dateFontSize = 20;
+        double dateFontSize;
+        Color textColor;
 
-        if (isTodayDate) {
-          circleColor = AppConstants.todayCircleColor;
-          circleSize = 44;
+        if (isSelected) {
+          circleColor = AppConstants.todayCircleColor; // белый кружок выделения
+          circleSize = 40;
+          dateFontSize = 18;
+          textColor = accentColor; // текст цветом акцента на белом
+          showDashedBorder = false;
+        } else if (isRealToday) {
+          circleColor = lightAccent; // светлый оттенок
+          circleSize = 32;
+          dateFontSize = 16;
+          textColor = accentColor;
+          showDashedBorder = true;
         } else {
-          circleColor = AppConstants.dateCircleColor;
-          circleSize = 38;
-          if (!isCurrentWeek && weekday == todayWeekday) {
-            showDashedBorder = true;
-          }
+          circleColor = lightAccent;
+          circleSize = 32;
+          dateFontSize = 16;
+          textColor = accentColor;
         }
 
         final dateWidget = Text(
           '${date.day}',
           style: TextStyle(
-            color: AppConstants.accentColor,
+            color: textColor,
             fontSize: dateFontSize,
-            fontWeight: FontWeight.w600,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
           ),
         );
 

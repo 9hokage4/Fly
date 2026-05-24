@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../../../constants.dart';
+import '../../model/settings_model.dart';
 import '../../controller/task_controller.dart';
 
 class TaskCalendarDialog extends StatefulWidget {
@@ -35,40 +37,49 @@ class _TaskCalendarDialogState extends State<TaskCalendarDialog> {
     final statuses = await widget.taskController.getStatusesForMonth(month);
     if (mounted) {
       setState(() {
-        _taskStatuses = statuses.map((key, value) => MapEntry(DateTime(key.year, key.month, key.day), value));
+        _taskStatuses = statuses.map(
+              (key, value) => MapEntry(DateTime(key.year, key.month, key.day), value),
+        );
       });
     }
   }
 
-  Color _getCircleColor(DateTime day) {
+  Color _getCircleColor(DateTime day, Color accentColor, Color lightAccent) {
     final normalizedDay = DateTime(day.year, day.month, day.day);
     final status = _taskStatuses[normalizedDay] ?? 'none';
     switch (status) {
       case 'active':
-        return AppConstants.accentColor;
+        return accentColor;
       case 'completed':
-        return AppConstants.dateCircleColor;
+        return lightAccent;
       default:
         return Colors.white;
     }
   }
 
-  Color _getTextColor(Color backgroundColor) {
-    return backgroundColor == AppConstants.accentColor
-        ? Colors.white
-        : AppConstants.accentColor;
+  Color _getTextColor(Color backgroundColor, Color accentColor) {
+    return backgroundColor == accentColor ? Colors.white : accentColor;
   }
 
   @override
   Widget build(BuildContext context) {
+    final settings = context.watch<SettingsModel>();
+    final accentColor = settings.accentColor;
+    final lightAccent = settings.lightAccentColor;
+
     final today = DateTime.now();
     final monthTitle = DateFormat('LLLL yyyy', 'ru').format(_focusedDay);
     final title = monthTitle[0].toUpperCase() + monthTitle.substring(1);
 
     return AlertDialog(
+      title: Text(
+        title,
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+      ),
       content: SizedBox(
         width: 300,
-        height: 400,
+        height: 380,
         child: TableCalendar(
           locale: 'ru',
           firstDay: DateTime(2020),
@@ -94,8 +105,8 @@ class _TaskCalendarDialogState extends State<TaskCalendarDialog> {
           },
           calendarBuilders: CalendarBuilders(
             defaultBuilder: (context, day, focusedDay) {
-              final circleColor = _getCircleColor(day);
-              final textColor = _getTextColor(circleColor);
+              final circleColor = _getCircleColor(day, accentColor, lightAccent);
+              final textColor = _getTextColor(circleColor, accentColor);
               final isToday = day.year == today.year &&
                   day.month == today.month &&
                   day.day == today.day;
@@ -105,7 +116,7 @@ class _TaskCalendarDialogState extends State<TaskCalendarDialog> {
                   shape: BoxShape.circle,
                   color: circleColor,
                   border: isToday
-                      ? Border.all(color: AppConstants.accentColor, width: 2)
+                      ? Border.all(color: accentColor, width: 2)
                       : null,
                 ),
                 child: Center(
@@ -122,9 +133,9 @@ class _TaskCalendarDialogState extends State<TaskCalendarDialog> {
             selectedBuilder: (context, day, focusedDay) {
               return Container(
                 margin: const EdgeInsets.all(4),
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppConstants.accentColor,
+                  color: accentColor,
                 ),
                 child: Center(
                   child: Text(
@@ -138,14 +149,14 @@ class _TaskCalendarDialogState extends State<TaskCalendarDialog> {
               );
             },
             todayBuilder: (context, day, focusedDay) {
-              final circleColor = _getCircleColor(day);
-              final textColor = _getTextColor(circleColor);
+              final circleColor = _getCircleColor(day, accentColor, lightAccent);
+              final textColor = _getTextColor(circleColor, accentColor);
               return Container(
                 margin: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: circleColor,
-                  border: Border.all(color: AppConstants.accentColor, width: 2),
+                  border: Border.all(color: accentColor, width: 2),
                 ),
                 child: Center(
                   child: Text(

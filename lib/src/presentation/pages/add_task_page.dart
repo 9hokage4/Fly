@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../constants.dart';
+import '../../model/settings_model.dart';
 import '../../entity/task.dart';
 import '../../controller/task_controller.dart';
 
@@ -82,8 +84,10 @@ class _AddTaskPageState extends State<AddTaskPage> {
 
   @override
   Widget build(BuildContext context) {
+    final lightAccent = context.watch<SettingsModel>().lightAccentColor;
+
     return Scaffold(
-      backgroundColor: AppConstants.taskBackgroundColor, // светлый фон
+      backgroundColor: AppConstants.todayCircleColor, // светлый фон
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -92,8 +96,8 @@ class _AddTaskPageState extends State<AddTaskPage> {
           'Создать задачу',
           style: TextStyle(
             fontFamily: 'Roboto',
-            fontWeight: FontWeight.w600, // SemiBold
-            fontSize: 32, // 96px / 3
+            fontWeight: FontWeight.w600,
+            fontSize: 32,
             color: Colors.black,
           ),
         ),
@@ -103,22 +107,21 @@ class _AddTaskPageState extends State<AddTaskPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 20,),
-            // Название
+            const SizedBox(height: 40),
             const Text(
               'Название',
               style: TextStyle(
                 fontFamily: 'Roboto',
-                fontWeight: FontWeight.w500, // Medium
-                fontSize: 20,
+                fontWeight: FontWeight.w500,
+                fontSize: 16,
               ),
             ),
             const SizedBox(height: 8),
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
-                color: AppConstants.dateCircleColor, // #EADAFF
-                borderRadius: BorderRadius.circular(10), // 30px / 3
+                color: lightAccent, // динамический светлый оттенок
+                borderRadius: BorderRadius.circular(10),
               ),
               child: TextField(
                 controller: _titleController,
@@ -130,21 +133,20 @@ class _AddTaskPageState extends State<AddTaskPage> {
               ),
             ),
             const SizedBox(height: 20),
-            // Описание
             const Text(
               'Описание',
               style: TextStyle(
                 fontFamily: 'Roboto',
                 fontWeight: FontWeight.w500,
-                fontSize: 20,
+                fontSize: 16,
               ),
             ),
             const SizedBox(height: 8),
             Container(
               width: double.infinity,
-              height: 94, // 283px / 3 ≈ 94
+              height: 94,
               decoration: BoxDecoration(
-                color: AppConstants.dateCircleColor,
+                color: lightAccent,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: TextField(
@@ -160,24 +162,21 @@ class _AddTaskPageState extends State<AddTaskPage> {
               ),
             ),
             const SizedBox(height: 20),
-            // Дата
             ListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Дата'),
+              title: const Text('Дата', style: TextStyle(fontSize: 16)),
               subtitle: Text(_formatDate(_selectedDate)),
               trailing: const Icon(Icons.calendar_today),
               onTap: _pickDate,
             ),
-            // Время
             ListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Время'),
+              title: const Text('Время', style: TextStyle(fontSize: 16)),
               subtitle: Text(_formatTime(_selectedTime)),
               trailing: const Icon(Icons.access_time),
               onTap: _pickTime,
             ),
             const SizedBox(height: 30),
-            // Кнопки
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -187,11 +186,11 @@ class _AddTaskPageState extends State<AddTaskPage> {
                     padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                   ),
                   onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text('Отмена', style: TextStyle(fontSize: 18)),
+                  child: const Text('Отмена', style: TextStyle(fontSize: 18, color: Colors.white)),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppConstants.accentColor,
+                    backgroundColor: context.watch<SettingsModel>().accentColor, // динамический основной цвет
                     padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                   ),
                   onPressed: _onSave,

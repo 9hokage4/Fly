@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../constants.dart';
+import '../../model/settings_model.dart';
 import '../../controller/week_controller.dart';
 import '../../controller/task_controller.dart';
 import '../../entity/task.dart';
@@ -10,6 +12,7 @@ import '../dialogs/task_detail_dialog.dart';
 import 'add_task_page.dart';
 import 'package:flutter/services.dart';
 import '../dialogs/task_calendar_dialog.dart';
+import 'settings_page.dart';
 
 class HomePage extends StatefulWidget {
   final TaskController taskController;
@@ -65,6 +68,10 @@ class _HomePageState extends State<HomePage> {
     setState(() {});
   }
 
+  void _onSettingsTap() {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsPage()));
+  }
+
   Future<void> _loadTasksForDate(DateTime date) async {
     await widget.taskController.loadTasks(date);
   }
@@ -96,7 +103,6 @@ class _HomePageState extends State<HomePage> {
     _loadTasksForDate(date);
   }
 
-  // Обновлённый метод: передаём onDelete в диалог
   void _onTaskTap(Task task) {
     showDialog(
       context: context,
@@ -107,10 +113,8 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Новый метод удаления задачи
   void _onTaskDelete(Task task) {
     widget.taskController.deleteTask(task.id);
-    // Контроллер сам вызовет loadTasks и обновит UI через _onTasksChanged
   }
 
   void _onTaskToggle(Task task) {
@@ -131,9 +135,13 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final settings = context.watch<SettingsModel>();
+    final accentColor = settings.accentColor;
+    final lightAccent = settings.lightAccentColor;
+
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
-        systemNavigationBarColor: Color(0xFFFCFAFF),
+        systemNavigationBarColor: AppConstants.todayCircleColor,
         systemNavigationBarIconBrightness: Brightness.dark,
       ),
     );
@@ -141,13 +149,14 @@ class _HomePageState extends State<HomePage> {
     final topPadding = MediaQuery.of(context).padding.top;
 
     return Scaffold(
-      backgroundColor: AppConstants.accentColor,
+      backgroundColor: accentColor,
       body: Column(
         children: [
           SizedBox(height: topPadding),
           DateHeader(
             selectedDate: _selectedDate,
             onCalendarTap: _onCalendarTap,
+            onSettingsTap: _onSettingsTap,
           ),
           WeekPageView(
             weekController: widget.weekController,
@@ -159,12 +168,10 @@ class _HomePageState extends State<HomePage> {
           Expanded(
             child: Container(
               decoration: const BoxDecoration(
-                color: AppConstants.taskBackgroundColor,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(38),
-                ),
+                color: AppConstants.todayCircleColor,
+                borderRadius: BorderRadius.only(topLeft: Radius.circular(38)),
               ),
-              child: _buildTasksList(),
+              child: _buildTasksList(accentColor, lightAccent),
             ),
           ),
         ],
@@ -172,9 +179,9 @@ class _HomePageState extends State<HomePage> {
       floatingActionButton: Container(
         width: 54,
         height: 54,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: AppConstants.accentColor,
+          color: accentColor,
         ),
         child: IconButton(
           icon: const Icon(Icons.add, color: Colors.white, size: 28),
@@ -185,7 +192,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildTasksList() {
+  Widget _buildTasksList(Color accentColor, Color lightAccent) {
     final tasks = widget.taskController.tasksForDate;
     final activeTasks = tasks.where((t) => !t.isCompleted).toList();
     final completedTasks = tasks.where((t) => t.isCompleted).toList();
@@ -212,12 +219,8 @@ class _HomePageState extends State<HomePage> {
           ...activeTasks.asMap().entries.map((entry) {
             final index = entry.key;
             final task = entry.value;
-            final bgColor = index % 2 == 0
-                ? AppConstants.dateCircleColor
-                : AppConstants.accentColor;
-            final markerColor = index % 2 == 0
-                ? AppConstants.accentColor
-                : AppConstants.todayCircleColor;
+            final bgColor = index % 2 == 0 ? lightAccent : accentColor;
+            final markerColor = index % 2 == 0 ? accentColor : AppConstants.todayCircleColor;
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: TaskCard(
@@ -246,8 +249,8 @@ class _HomePageState extends State<HomePage> {
               task: task,
               onTap: () => _onTaskTap(task),
               onToggle: () => _onTaskToggle(task),
-              backgroundColor: AppConstants.dateCircleColor,
-              markerColor: AppConstants.accentColor,
+              backgroundColor: lightAccent,
+              markerColor: accentColor,
             ),
           )),
         ],
