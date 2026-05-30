@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../main.dart';
 import '../../model/settings_model.dart';
+import '../../services/auth_service.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -38,6 +41,18 @@ class SettingsPage extends StatelessWidget {
               title: 'Основной цвет',
               icon: Icons.color_lens,
               onTap: () => _showColorDialog(context),
+            ),
+            const SizedBox(height: 12),
+            _buildSettingCard(
+              context,
+              title: 'Выйти',
+              icon: Icons.logout,
+              onTap: () async {
+                await Supabase.instance.client.auth.signOut();
+                if (context.mounted) {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                }
+              },
             ),
           ],
         ),

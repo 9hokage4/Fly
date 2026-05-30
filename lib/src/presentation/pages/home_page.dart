@@ -15,14 +15,7 @@ import '../dialogs/task_calendar_dialog.dart';
 import 'settings_page.dart';
 
 class HomePage extends StatefulWidget {
-  final TaskController taskController;
-  final WeekController weekController;
-
-  const HomePage({
-    super.key,
-    required this.taskController,
-    required this.weekController,
-  });
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -32,21 +25,27 @@ class _HomePageState extends State<HomePage> {
   late DateTime _selectedDate;
   Map<DateTime, String> _taskStatuses = {};
 
+  late final TaskController _taskController;
+  late final WeekController _weekController;
+
   @override
   void initState() {
     super.initState();
+    _taskController = context.read<TaskController>();
+    _weekController = context.read<WeekController>();
+
     _selectedDate = DateTime.now();
     _loadTasksForDate(_selectedDate);
-    widget.taskController.addListener(_onTasksChanged);
-    widget.weekController.addListener(_loadWeekTaskStatuses);
+    _taskController.addListener(_onTasksChanged);
+    _weekController.addListener(_loadWeekTaskStatuses);
     _loadWeekTaskStatuses();
   }
 
   Future<void> _loadWeekTaskStatuses() async {
-    final week = widget.weekController.currentWeek;
+    final week = _weekController.currentWeek;
     final Map<DateTime, String> newStatuses = {};
     for (final date in week.days) {
-      final status = await widget.taskController.getDateTaskStatus(date);
+      final status = await _taskController.getDateTaskStatus(date);
       newStatuses[date] = status;
     }
     if (mounted) {
@@ -58,8 +57,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
-    widget.taskController.removeListener(_onTasksChanged);
-    widget.weekController.removeListener(_loadWeekTaskStatuses);
+    _taskController.removeListener(_onTasksChanged);
+    _weekController.removeListener(_loadWeekTaskStatuses);
     super.dispose();
   }
 
@@ -73,19 +72,19 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _loadTasksForDate(DateTime date) async {
-    await widget.taskController.loadTasks(date);
+    await _taskController.loadTasks(date);
   }
 
   void _onCalendarTap() async {
     final selectedDate = await showDialog<DateTime>(
       context: context,
       builder: (_) => TaskCalendarDialog(
-        taskController: widget.taskController,
+        taskController: _taskController,
         initialDate: _selectedDate,
       ),
     );
     if (selectedDate != null) {
-      widget.weekController.goToDate(selectedDate);
+      _weekController.goToDate(selectedDate);
       setState(() {
         _selectedDate = selectedDate;
       });
@@ -114,18 +113,18 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _onTaskDelete(Task task) {
-    widget.taskController.deleteTask(task.id);
+    _taskController.deleteTask(task.id);
   }
 
   void _onTaskToggle(Task task) {
-    widget.taskController.toggleComplete(task);
+    _taskController.toggleComplete(task);
   }
 
   void _onAddTask() async {
     final result = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
-        builder: (_) => AddTaskPage(taskController: widget.taskController),
+        builder: (_) => AddTaskPage(taskController: _taskController),
       ),
     );
     if (result == true) {
@@ -159,7 +158,7 @@ class _HomePageState extends State<HomePage> {
             onSettingsTap: _onSettingsTap,
           ),
           WeekPageView(
-            weekController: widget.weekController,
+            weekController: _weekController,
             selectedDate: _selectedDate,
             onDaySelected: _onDaySelected,
             taskStatuses: _taskStatuses,
@@ -193,7 +192,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildTasksList(Color accentColor, Color lightAccent) {
-    final tasks = widget.taskController.tasksForDate;
+    final tasks = _taskController.tasksForDate;
     final activeTasks = tasks.where((t) => !t.isCompleted).toList();
     final completedTasks = tasks.where((t) => t.isCompleted).toList();
 
